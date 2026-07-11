@@ -5,3 +5,9 @@ node_modules
 *.md
 public/uploads
 prisma/dev.db*
+android
+ios
+assets
+app-shell
+scripts
+.github

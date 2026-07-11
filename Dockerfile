@@ -15,6 +15,10 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# NEXT_PUBLIC_*은 빌드 시 클라이언트 번들에 인라인됨 — 공개값만 (VAPID 공개키는 공개가 정상)
+ARG NEXT_PUBLIC_SITE_URL=https://duction.co
+ARG NEXT_PUBLIC_VAPID_PUBLIC_KEY=BKCJ47OJY5wkUS04HMeeFi9SsbFBdm49Yl0Xno4jXHafZDTKSZBYY-h9r4fiGzw9fUJKF0M4YJtPuFqDu-K0DaA
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL NEXT_PUBLIC_VAPID_PUBLIC_KEY=$NEXT_PUBLIC_VAPID_PUBLIC_KEY
 RUN npx prisma generate \
   && npm run build \
   # 워커는 단일 JS로 번들 (@prisma/client는 standalone node_modules에서 해석)

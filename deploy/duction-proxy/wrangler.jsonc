@@ -1,0 +1,10 @@
+{
+  // duction.co → Cloud Run 프록시 (Arcaddy api-proxy 패턴)
+  "name": "duction-proxy",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-07-01",
+  "routes": [
+    { "pattern": "duction.co", "custom_domain": true },
+    { "pattern": "www.duction.co", "custom_domain": true }
+  ]
+}
