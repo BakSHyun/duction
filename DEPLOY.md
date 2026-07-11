@@ -1,5 +1,10 @@
 # 덕션 배포 가이드
 
+> ⚡ **2026-07-12 실배포 진행됨 (M25)** — Arcaddy 스택 편입 구성:
+> GCP `duction-app`(Cloud Run duction-web, 서울) + Supabase `duction`(xttkbkprmbktqzbmpnur, 서울)
+> + Cloudflare R2 `duction-media`(r2.dev 공개 URL) + duction.co(프록시 워커 deploy/duction-proxy).
+> 아래 Vercel 가이드는 대안 경로로 보존.
+
 > 대상: 첫 실서비스 배포 (베타 오픈 수준).
 > 권장 조합: **Vercel(앱) + Neon 또는 Supabase(PostgreSQL) + Cloudflare R2(이미지)** — 전부 무료 티어로 시작 가능.
 
