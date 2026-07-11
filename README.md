@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 덕션 (Duction) — 브라이스 경매 플랫폼 MVP
 
-## Getting Started
+브라이스(Blythe) 인형 수집가를 위한 경매 기반 중고 거래 플랫폼.
 
-First, run the development server:
+| 문서 | 내용 |
+|---|---|
+| [PLANNING.md](./PLANNING.md) | 전체 서비스 기획 (브라이스 전략: §13) |
+| [DEVELOPMENT-PLAN.md](./DEVELOPMENT-PLAN.md) | 마일스톤별 상세 기획 (M1~M4 완료, 백로그) |
+| [DEPLOY.md](./DEPLOY.md) | 실서비스 배포 가이드 + 오픈 전 체크리스트 |
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | 백엔드 아키텍처 — 언어 선택, 서비스 분해, 연쇄 장애 방지, 단계 로드맵 |
+| [APP.md](./APP.md) | 하이브리드 앱 빌드·스토어 제출 가이드 (iOS/Android 프로젝트 포함) |
 
+## 실행
+
+**로컬 개발** (Postgres만 컨테이너로):
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+docker compose up -d postgres   # PostgreSQL 기동
+npx prisma migrate dev          # 스키마 적용
+npm run db:seed                 # 카테고리·모델 도감·데모 경매 시드
+npm run dev                     # http://localhost:3000
+npm run worker                  # (별도 터미널) 정산 워커 — 없어도 lazy-settle 폴백이 커버
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+**전체 스택** (운영과 동일 구성 — web + worker + Postgres + Redis):
+```bash
+docker compose up --build       # http://localhost:3100
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+> ⚠ **스키마 마이그레이션 후에는 dev 서버를 재시작하세요.** Turbopack이 Prisma 클라이언트를
+> 캐시해서, 재시작 없이는 새 컬럼을 모르는 상태로 `PrismaClientValidationError`가 납니다.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+데모 계정 (비밀번호 공통 `password123`):
+- `seller@duction.kr` 브라이스집사 (판매자)
+- `artist@duction.kr` 달빛공방 (커스텀 작가)
+- `bidder1@duction.kr` / `bidder2@duction.kr` (입찰자)
+- `admin@duction.kr` 덕션운영팀 (어드민 → `/admin`)
 
-## Learn More
+## 구현된 것 (MVP)
 
-To learn more about Next.js, take a look at the following resources:
+- **경매 엔진** (`src/lib/bidding.ts`)
+  - 프록시 자동입찰 (eBay 방식 — 최대가 제출, 시스템이 최소 단위로만 상승)
+  - 가격 구간별 입찰 단위 (500원~10,000원)
+  - soft-close 스나이핑 방지 (마감 5분 전 입찰 → 5분 연장)
+  - 즉시구매, 본인 경매 입찰 차단, 정지 계정 차단
+  - 낙찰 정산 + 미결제 페널티 (경고→7일 정지→영구 정지)
+- **브라이스 특화 등록 템플릿**: 라인/모델 도감 선택, 정품·팩토리 강제 구분(정책 B),
+  풀셋 구성 체크, 커스텀 내역·작가명, 상태 등급 S/A/B/C
+- **거래 사이클**: 낙찰 → 모의 결제 → 발송 등록 → 수령 확인(구매 확정)
+- **실시간 현재가**: 3초 폴링 (`/api/auctions/[id]`)
+- 이메일 회원가입/로그인 (세션 쿠키), 입찰 기록 공개(닉네임 마스킹)
+- **검색·필터** (`/search`): 키워드·카테고리·정품구분·상태등급 필터 + 5종 정렬, URL 공유 가능
+- **찜 + 인앱 알림**: 입찰 밀림·낙찰·판매·결제·발송 알림, 헤더 벨(30초 폴링)
+- **모델 도감·시세** (`/models`): 모델별 낙찰가 히스토리, 무커스텀 기준 시세 통계(커스텀 포함 토글)
+- **작가 프로필·분양 경매** (`/artists`): 작가 등록·팔로우, 새 분양 시 팔로워 알림, 분양 이력(낙찰가) 공개
+- **어드민** (`/admin`): 신고 접수·처리(기각/경매 취소/유저 제재 3단계), 작가 인증 배지, **분쟁 중재(환불/기각)**, 운영 대시보드
+- **분쟁 신고**: 배송 중/완료 주문에서 구매자 문제 신고 → DISPUTED(확정 잠금) → 어드민 중재
+- **웹푸시**: 알림 페이지에서 브라우저 알림 구독 — 발송은 워커가 미발송분을 집어 처리(만료 구독 자동 정리)
+- **탐색 고도화**: 가격대 필터, 페이지네이션, 모델명 자동완성
+- **덕력 시스템**: 신뢰의 단일 수치 — 거래 완료 +50 / 평가 ★기반 / 미결제 −100 / 제재 −200, 오리 성장 등급 5단계(알→황금오리), 전 변동 내역 로그(불변식: 로그 합계 == 덕력)
+- **가이드 콘텐츠** (`/guide`): 정품·팩토리 구별법, 첫 입찰(자동입찰 이해), 안전거래·사기 예방, 포장·배송
+- **PWA**: 모바일 "홈 화면에 추가"로 설치형 앱 실행 (manifest + 오리 아이콘 + 웹푸시)
+- **하이브리드 앱**: Capacitor iOS/Android 네이티브 프로젝트 (`ios/`·`android/`) — 양 플랫폼 빌드 검증 완료, 스토어 제출 절차는 APP.md
+- **발송 채널 계층**: 웹푸시 활성, SMS·카카오 알림톡은 어댑터 자리(계약 후 키+구현만) — 중요 알림만 유료 채널
+- **Redis 레이트 리밋**: 입찰 30회/분·로그인 10회/5분 — Redis 장애 시 fail-open(입찰은 계속 동작)
+- **거래 완결(M20)**: 결제 시 배송지 입력(기본 배송지 재사용), 경매 Q&A(외부거래 유도 차단), 판매자 프로필(`/users/[id]`), 입찰 전 경매 취소·유찰 원클릭 재등록, 계정 설정(닉네임·비밀번호·탈퇴)
+- **운영 무장(M21)**: 유저 관리 콘솔(`/admin/users`), 외부거래 자동 감지(자동 신고), 영구정지 시 경매 일괄 취소, 정산 장부, KPI 대시보드(주간 낙찰·GMV·유찰률·결제완료율), 감사 로그, 공지사항, 1:1 문의
+- **리텐션(M22)**: 찜 마감 1시간 전 알림, 입찰 1회 취소(차순위 복원), 이미지 라이트박스, 최근 본 경매, 도감 시세 차트, 푸시 알림 유형 설정
+- **Reserve price**: 비공개 최저 낙찰가 — 미달 마감 시 유찰. 설정 여부·도달 상태만 공개
+- **차순위 승계**: 낙찰자 미결제 시 차순위 입찰자에게 본인 응찰가로 승계 주문 (승계 미결제는 페널티 없음, 재승계 없음)
+- **분양 예고**: 예약 시작 경매(SCHEDULED) — 시작 전 입찰 잠금 + 카운트다운, 시작 시각 자동 LIVE 전환
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+엔진 시나리오 테스트: `npx tsx scripts/test-bidding.ts`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 운영 전환 시 교체 목록 (코드 주석에도 표기)
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| 현재 | 운영 |
+|---|---|
+| ~~SQLite~~ → **PostgreSQL + `FOR UPDATE` row lock 적용 완료** | 관리형 PG (Neon 등)로 이전만 |
+| ~~lazy 정산~~ → **정산 워커 분리 완료** (lazy-settle은 폴백 유지) | 규모 커지면 BullMQ 지연 잡 |
+| 3초 폴링 | WebSocket/SSE (Stage 2 — ARCHITECTURE.md §7) |
+| 모의 결제 | 토스페이먼츠 에스크로 |
+| 로컬 `public/uploads` (컨테이너에서 휘발) | Cloudflare R2/S3 — 배포 전 필수 |
+| 이메일 가입 | 휴대폰 본인인증 + 신규 계정 입찰 한도 |

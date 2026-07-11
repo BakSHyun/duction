@@ -1,0 +1,411 @@
+// 덕션(Duction) 스키마 — PostgreSQL (로컬: docker compose up -d postgres)
+// 상태값은 src/lib/constants.ts 의 상수 사용 (enum 전환은 백로그)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nickname     String   @unique
+  // 페널티 단계: 0=정상, 1=경고, 2=7일정지, 3=영구정지
+  penaltyLevel Int      @default(0)
+  suspendedUntil DateTime?
+  ratingAvg    Float    @default(0)
+  ratingCount  Int      @default(0)
+  salesCount   Int      @default(0)
+  // 덕력 (M14) — 신뢰의 단일 수치. 서버 이벤트로만 변동, 내역은 DuckPowerLog
+  duckPower    Int      @default(0)
+  // 기본 배송지 (M20) — 결제 시 입력값을 저장해 다음 결제에 재사용
+  shipName     String?
+  shipPhone    String?
+  shipAddress  String?
+  // 푸시 발송 제외 알림 타입 JSON 배열 (M22) — 인앱 알림은 항상 생성
+  pushOptOut   String?
+  // 커스텀 작가 프로필 (M5) — 자가 등록, 인증 배지는 어드민 부여 (M8)
+  isArtist     Boolean  @default(false)
+  artistVerified Boolean @default(false)
+  artistBio    String?
+  artistSns    String?
+  isAdmin      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  sessions   Session[]
+  items      Item[]
+  bids       Bid[]
+  wonAuctions Auction[] @relation("winner")
+  purchases  Order[]   @relation("buyer")
+  sales      Order[]   @relation("seller")
+  watchlist  Watchlist[]
+  notifications Notification[]
+  following  ArtistFollow[] @relation("follower")
+  followers  ArtistFollow[] @relation("artist")
+  pushSubscriptions PushSubscription[]
+  duckPowerLogs DuckPowerLog[]
+}
+
+// 덕력 적립 내역 (M14) — 투명성. 합계는 User.duckPower와 일치해야 한다
+model DuckPowerLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount    Int
+  reason    String
+  createdAt DateTime @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  orderId    String
+  reviewerId String
+  targetId   String
+  rating     Int      // 1~5
+  tags       String?  // JSON 배열 문자열 (SQLite — 운영 전환 시 String[])
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  @@unique([orderId, reviewerId])
+  @@index([targetId, createdAt])
+}
+
+model Report {
+  id         String    @id @default(cuid())
+  // null = 시스템 자동 감지 (M21 moderation)
+  reporterId String?
+  targetType String    @default("AUCTION")
+  targetId   String    // Auction.id
+  reason     String    // FAKE_GENUINE | PROHIBITED | FRAUD | OFFSITE | OTHER
+  detail     String?
+  // OPEN | RESOLVED | DISMISSED
+  status     String    @default("OPEN")
+  resolution String?
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([status, createdAt])
+}
+
+model ArtistFollow {
+  followerId String
+  follower   User     @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+  artistId   String
+  artist     User     @relation("artist", fields: [artistId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([followerId, artistId])
+  @@index([artistId])
+}
+
+model Session {
+  token     String   @id
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Category {
+  id       String     @id @default(cuid())
+  parentId String?
+  parent   Category?  @relation("tree", fields: [parentId], references: [id])
+  children Category[] @relation("tree")
+  name     String
+  slug     String     @unique
+  sortOrder Int       @default(0)
+
+  items Item[]
+}
+
+// 브라이스 모델 도감 — 등록 시 자동완성 + 시세 히스토리의 기반
+model BlytheModel {
+  id          String  @id @default(cuid())
+  name        String
+  nameKo      String?
+  line        String  // NEO | MIDDIE | PETITE | VINTAGE
+  releaseYear Int?
+  msrpJpy     Int?
+
+  items Item[]
+
+  @@unique([name, line])
+}
+
+model Item {
+  id          String  @id @default(cuid())
+  sellerId    String
+  seller      User    @relation(fields: [sellerId], references: [id])
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  title       String
+  description String
+  // S=미개봉, A=개봉 미전시, B=전시품, C=사용감
+  conditionGrade String
+  // 정품 구분(§13.4 정책 B): GENUINE | FACTORY | UNKNOWN — 허위 기재 시 영구 정지
+  authenticity String @default("UNKNOWN")
+  // 브라이스 본체 전용 필드
+  blytheModelId String?
+  blytheModel   BlytheModel? @relation(fields: [blytheModelId], references: [id])
+  fullSetBox    Boolean @default(false)
+  fullSetCert   Boolean @default(false) // 증지
+  fullSetStand  Boolean @default(false)
+  fullSetOutfit Boolean @default(false)
+  // NONE | PARTIAL | FULL
+  customLevel   String  @default("NONE")
+  customArtist  String?
+  customDetails String? // 페이스업, 카빙, 아이칩 교체 등 자유 기술
+  createdAt   DateTime @default(now())
+
+  images  ItemImage[]
+  auction Auction?
+
+  @@index([sellerId])
+}
+
+model ItemImage {
+  id          String  @id @default(cuid())
+  itemId      String
+  item        Item    @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  url         String
+  isProofShot Boolean @default(false) // 당일 손메모 인증샷
+  sortOrder   Int     @default(0)
+}
+
+model Auction {
+  id            String    @id @default(cuid())
+  itemId        String    @unique
+  item          Item      @relation(fields: [itemId], references: [id])
+  startPrice    Int
+  buyNowPrice   Int?
+  // 비공개 최저 낙찰가 (M7) — 마감 시 미달이면 유찰. 금액은 비공개
+  reservePrice  Int?
+  currentPrice  Int
+  startsAt      DateTime  @default(now())
+  endsAt        DateTime
+  // soft-close 연장 횟수 (마감 5분 전 입찰 시 5분 연장)
+  extendedCount Int       @default(0)
+  // SCHEDULED | LIVE | ENDED_SOLD | ENDED_UNSOLD | CANCELLED
+  status        String    @default("LIVE")
+  winnerId      String?
+  winner        User?     @relation("winner", fields: [winnerId], references: [id])
+  bidCount      Int       @default(0)
+  // 찜 마감임박 알림 발송 마킹 (M22) — 중복 발송 방지
+  endingSoonNotifiedAt DateTime?
+  createdAt     DateTime  @default(now())
+
+  bids      Bid[]
+  orders    Order[]
+  watchers  Watchlist[]
+  questions AuctionQuestion[]
+
+  @@index([status, endsAt])
+}
+
+model Bid {
+  id             String   @id @default(cuid())
+  auctionId      String
+  auction        Auction  @relation(fields: [auctionId], references: [id])
+  bidderId       String
+  bidder         User     @relation(fields: [bidderId], references: [id])
+  // 화면에 표시되는 응찰가
+  amount         Int
+  // 자동입찰 상한 (프록시 입찰)
+  maxProxyAmount Int
+  isAuto         Boolean  @default(false)
+  // ACTIVE(현재 최고) | OUTBID | WON | CANCELLED
+  status         String   @default("ACTIVE")
+  createdAt      DateTime @default(now())
+
+  @@index([auctionId, createdAt])
+  @@index([bidderId])
+}
+
+model Order {
+  id           String    @id @default(cuid())
+  // 차순위 승계(M7)로 경매당 주문이 복수일 수 있음 (원 주문 CANCELLED + 승계 주문)
+  auctionId    String
+  auction      Auction   @relation(fields: [auctionId], references: [id])
+  buyerId      String
+  buyer        User      @relation("buyer", fields: [buyerId], references: [id])
+  sellerId     String
+  seller       User      @relation("seller", fields: [sellerId], references: [id])
+  amount       Int
+  fee          Int       @default(0)
+  // PENDING_PAYMENT | PAID | SHIPPED | DELIVERED | CONFIRMED | DISPUTED | REFUNDED | CANCELLED
+  status       String    @default("PENDING_PAYMENT")
+  // 낙찰 후 24시간 내 미결제 시 자동 취소 + 페널티
+  paymentDueAt DateTime
+  // 차순위 승계 주문 (M7) — 미결제해도 페널티 없음, 재승계 없음
+  isSecondChance Boolean @default(false)
+  // 분쟁 신고 사유 (M12) — DISPUTED 상태일 때 필수
+  disputeReason String?
+  // 배송지 (M20) — 결제 시 입력
+  shipName    String?
+  shipPhone   String?
+  shipAddress String?
+  trackingNo   String?
+  carrier      String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([buyerId])
+  @@index([sellerId])
+  @@index([auctionId])
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // OUTBID | WON | SOLD | UNSOLD | ORDER_CANCELLED | PAID | SHIPPED
+  type      String
+  title     String
+  body      String?
+  link      String?
+  readAt    DateTime?
+  // 웹푸시 발송 마킹 (M13) — 워커가 미발송분을 집어 발송 (DB를 큐로)
+  pushedAt  DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId, readAt])
+  @@index([userId, createdAt])
+  @@index([pushedAt])
+}
+
+// 푸시 구독 (M13 웹푸시 + M19 FCM 네이티브)
+// kind=webpush: endpoint=구독URL, p256dh/auth 필수 · kind=fcm: endpoint=FCM 토큰
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      String   @default("webpush")
+  endpoint  String   @unique
+  p256dh    String?
+  auth      String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, kind])
+}
+
+// 경매 Q&A (M20) — 상태 질문이 외부 DM으로 새는 것을 막는다
+model AuctionQuestion {
+  id         String    @id @default(cuid())
+  auctionId  String
+  auction    Auction   @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  userId     String
+  body       String
+  answer     String?
+  answeredAt DateTime?
+  createdAt  DateTime  @default(now())
+
+  @@index([auctionId, createdAt])
+}
+
+model Watchlist {
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auctionId String
+  auction   Auction @relation(fields: [auctionId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, auctionId])
+}
+
+// 정산 장부 (M21) — 구매확정 시 생성, 어드민이 이체 후 완료 처리
+model Settlement {
+  id        String    @id @default(cuid())
+  orderId   String    @unique
+  sellerId  String
+  amount    Int // 정산액 = 낙찰가 - 수수료
+  fee       Int
+  // PENDING | PAID
+  status    String    @default("PENDING")
+  createdAt DateTime  @default(now())
+  settledAt DateTime?
+
+  @@index([status, createdAt])
+  @@index([sellerId])
+}
+
+// 어드민 감사 로그 (M21) — 누가 무엇을 처리했나
+model AuditLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  action     String
+  targetType String
+  targetId   String
+  detail     String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+// 공지사항 (M21)
+model Notice {
+  id        String   @id @default(cuid())
+  title     String
+  body      String
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([pinned, createdAt])
+}
+
+// 1:1 문의 (M21)
+model Inquiry {
+  id         String    @id @default(cuid())
+  userId     String
+  subject    String
+  body       String
+  answer     String?
+  answeredAt DateTime?
+  // OPEN | ANSWERED
+  status     String    @default("OPEN")
+  createdAt  DateTime  @default(now())
+
+  @@index([status, createdAt])
+  @@index([userId, createdAt])
+}
+
+// 컬렉션 자랑 피드 (M24, PLANNING.md Phase 3) — 커뮤니티가 곧 리텐션
+model Post {
+  id        String   @id @default(cuid())
+  userId    String
+  body      String
+  // 자랑하는 아이가 경매 중이면 연결 (선택)
+  auctionId String?
+  createdAt DateTime @default(now())
+
+  images PostImage[]
+  likes  PostLike[]
+
+  @@index([createdAt])
+  @@index([userId, createdAt])
+}
+
+model PostImage {
+  id        String @id @default(cuid())
+  postId    String
+  post      Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  url       String
+  sortOrder Int    @default(0)
+}
+
+model PostLike {
+  userId    String
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}

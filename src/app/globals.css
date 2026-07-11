@@ -1,26 +1,82 @@
 @import "tailwindcss";
+@import "pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* 덕션 디자인 토큰 — "러버덕 옥션 하우스"
+   클린 뉴트럴 그라운드 + duck yellow는 CTA·브랜드 키,
+   bill orange가 가격·강조 텍스트(가독 악센트). BRAND.md §3 */
+@theme {
+  /* ground & text */
+  --color-porcelain: #fcfcfa; /* 페이지 그라운드 — 웜 화이트 */
+  --color-ink: #26231c; /* 옐로우 기운의 웜 블랙 */
+  --color-mauve: #8a857a; /* 보조 텍스트 (웜 그레이) */
+  --color-mauve-light: #b5b0a3;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* surfaces & lines */
+  --color-blush: #f6f4ee; /* 서피스 틴트 */
+  --color-card: #ffffff;
+  --color-line: #eae8e1;
+  --color-line-strong: #d8d5cb;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* brand key — CTA 배경 (텍스트는 항상 ink) */
+  --color-duck: #ffd400;
+  --color-duck-deep: #efc000;
+  --color-cream: #fdf6d8; /* 소프트 하이라이트 배경 */
+
+  /* 기능 악센트 — 가격·강조·포커스 (부리색) */
+  --color-bill: #c96a0e;
+  --color-bill-deep: #a8560b;
+
+  /* 역할 컬러 (악센트와 분리) */
+  --color-wisteria: #6d5ba8; /* 작가·분양 */
+  --color-wisteria-soft: #efebf7;
+  --color-verdigris: #2e7d74; /* 인증 */
+  --color-verdigris-soft: #e3f0ee;
+
+  /* semantic */
+  --color-ok: #1f7a5c;
+  --color-ok-soft: #e4f2ec;
+  --color-warn: #a16207;
+  --color-warn-soft: #fdf3df;
+
+  --font-sans: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", sans-serif;
+  --font-display: "Pretendard Variable", "Pretendard", -apple-system, "Apple SD Gothic Neo", sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-porcelain);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 하이브리드 앱·PWA — 노치/홈 인디케이터 세이프 에어리어 (M18) */
+header {
+  padding-top: env(safe-area-inset-top);
+}
+footer {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* 가격·카운트다운 — 숫자 정렬 */
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: var(--color-duck);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-bill);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

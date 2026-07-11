@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 덕션 러버덕 마크 — BRAND.md §3. '덕'은 덕후의 덕이자 Duck -->
+  <ellipse cx="16.5" cy="21.5" rx="11.5" ry="8" fill="#FFD400"/>
+  <circle cx="12" cy="10.5" r="7" fill="#FFD400"/>
+  <ellipse cx="21.5" cy="11.5" rx="4.8" ry="2.6" fill="#C96A0E"/>
+  <ellipse cx="17" cy="22" rx="4.5" ry="3" fill="#EFC000"/>
+  <circle cx="14.2" cy="8.6" r="1.5" fill="#26231C"/>
+</svg>
