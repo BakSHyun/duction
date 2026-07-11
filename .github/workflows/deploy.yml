@@ -1,0 +1,43 @@
+name: Deploy (Cloud Run)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # GCP 세팅 전에는 스킵 (리포 Variables에 GCP_PROJECT_ID 등록 시 활성화)
+    if: vars.GCP_PROJECT_ID != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Arcaddy와 동일 패턴(WIF) — 새 GCP 프로젝트(duction) 세팅 후 아래 3개 값 교체
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy duction-web \
+            --source . \
+            --region asia-northeast3 \
+            --project ${{ vars.GCP_PROJECT_ID }} \
+            --allow-unauthenticated \
+            --min-instances 0 --max-instances 2 \
+            --memory 1Gi --cpu 1 \
+            --quiet

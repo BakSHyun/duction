@@ -37,8 +37,12 @@ async function createPlaceholders() {
   }
 }
 
+// 운영 시드 가드 (M25): SEED_DEMO=1 일 때만 데모 유저·경매 생성.
+// 운영 DB에는 카테고리·모델 도감만 들어간다 (데모 계정의 약한 비밀번호 유출 방지).
+const SEED_DEMO = process.env.SEED_DEMO === "1";
+
 async function main() {
-  await createPlaceholders();
+  if (SEED_DEMO) await createPlaceholders();
 
   // ---------- 카테고리 ----------
   const cat = async (name: string, slug: string, sortOrder: number, parentId?: string) =>
@@ -95,6 +99,11 @@ async function main() {
   const chocolate = await prisma.blytheModel.findUniqueOrThrow({
     where: { name_line: { name: "Simply Chocolate", line: "NEO" } },
   });
+
+  if (!SEED_DEMO) {
+    console.log("운영 시드 완료: 카테고리 + 모델 도감만 생성 (SEED_DEMO=1 로 데모 데이터 포함 가능)");
+    return;
+  }
 
   // ---------- 데모 유저 ----------
   const passwordHash = await bcrypt.hash("password123", 10);

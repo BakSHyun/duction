@@ -7,7 +7,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * - 개발:   CAP_SERVER_URL=http://<맥의 LAN IP>:3000 npx cap sync
  * - 운영:   실배포 후 아래 PROD_URL을 실제 도메인으로 교체 (스토어 제출의 전제조건)
  */
-const PROD_URL = "https://duction.kr"; // TODO: 실배포 도메인으로 교체
+const PROD_URL = "https://duction.co";
 
 const devUrl = process.env.CAP_SERVER_URL;
 
