@@ -5,8 +5,13 @@ const ORIGIN = "duction-web-948368048688.asia-northeast3.run.app";
 export default {
   async fetch(request) {
     const url = new URL(request.url);
+    const originalHost = url.hostname;
     url.protocol = "https:";
     url.hostname = ORIGIN;
-    return fetch(new Request(url, request));
+    const headers = new Headers(request.headers);
+    // Next.js 서버 액션 CSRF 검증이 origin과 대조하는 값 — 원래 도메인 유지
+    headers.set("x-forwarded-host", originalHost);
+    headers.set("x-forwarded-proto", "https");
+    return fetch(new Request(url, new Request(request, { headers })));
   },
 };

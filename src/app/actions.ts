@@ -159,7 +159,8 @@ export async function createListingAction(_: ActionResult | null, formData: Form
     try {
       // 리사이징 + WebP 변환 (M23) — 손상 파일은 여기서 걸러진다
       urls.push(await processAndSaveImage(file));
-    } catch {
+    } catch (err) {
+      console.error("[upload] 이미지 처리 실패:", err);
       return { ok: false, message: "이미지를 처리할 수 없어요. 파일이 손상되지 않았는지 확인해주세요." };
     }
   }
@@ -719,7 +720,8 @@ export async function createPostAction(_: ActionResult | null, formData: FormDat
     if (!file.type.startsWith("image/")) return { ok: false, message: "이미지 파일만 업로드할 수 있습니다." };
     try {
       urls.push(await processAndSaveImage(file));
-    } catch {
+    } catch (err) {
+      console.error("[upload] 이미지 처리 실패:", err);
       return { ok: false, message: "이미지를 처리할 수 없어요." };
     }
   }

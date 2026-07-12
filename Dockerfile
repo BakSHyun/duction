@@ -34,6 +34,8 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/src/assets ./src/assets
 COPY --from=builder /app/worker.js ./worker.js
+# 이미지 로컬 저장 경로 (R2 미설정 시 폴백) — 런타임 유저 쓰기 권한 필요
+RUN mkdir -p public/uploads && chown -R app:app public/uploads
 USER app
 EXPOSE 3000
 ENV HOSTNAME=0.0.0.0 PORT=3000
