@@ -16,7 +16,20 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: { default: "덕션 — 브라이스 경매", template: "%s | 덕션" },
   description: "브라이스 인형 수집가를 위한 안전한 경매 플랫폼. 입찰 기록 공개, 에스크로 안전거래.",
-  openGraph: { siteName: "덕션", type: "website", locale: "ko_KR" },
+  openGraph: {
+    siteName: "덕션",
+    type: "website",
+    locale: "ko_KR",
+    title: "덕션 — 브라이스 경매",
+    description: "좋아했던 마음까지, 제값에 이어지도록.",
+    images: [{ url: "/og.png", width: 1536, height: 900, alt: "덕션 — 좋아했던 마음까지, 제값에 이어지도록." }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "덕션 — 브라이스 경매",
+    description: "좋아했던 마음까지, 제값에 이어지도록.",
+    images: ["/og.png"],
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
