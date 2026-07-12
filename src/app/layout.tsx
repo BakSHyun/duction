@@ -28,8 +28,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="ko">
       <body className="min-h-screen bg-porcelain text-ink antialiased">
         <NativePush isLoggedIn={!!user} />
-        <header className="sticky top-0 z-20 border-b border-line bg-card/92 backdrop-blur">
-          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3">
+        <header className="sticky top-0 z-20 border-b border-line/80 bg-[#fffef9]/90 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3.5 sm:px-6">
             <Link href="/" className="flex shrink-0 items-baseline gap-2">
               <svg viewBox="0 0 32 32" className="h-[26px] w-[26px] self-center" aria-hidden="true">
                 <ellipse cx="16.5" cy="21.5" rx="11.5" ry="8" fill="#FFD400" />
@@ -38,7 +38,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                 <ellipse cx="17" cy="22" rx="4.5" ry="3" fill="#EFC000" />
                 <circle cx="14.2" cy="8.6" r="1.5" fill="#26231C" />
               </svg>
-              <span className="text-[22px] font-extrabold tracking-tight text-ink">덕션</span>
+              <span className="text-[22px] font-black tracking-[-0.04em] text-ink">덕션</span>
               <span className="hidden text-[11px] font-medium tracking-[0.15em] text-mauve-light md:inline">
                 DUCTION · BLYTHE AUCTION
               </span>
@@ -47,7 +47,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               <input
                 name="q"
                 placeholder="모델명, 키워드 검색"
-                className="w-full rounded-full border border-line-strong bg-porcelain px-4 py-1.5 text-sm focus:border-bill focus:outline-none"
+                className="w-full rounded-full border border-line bg-white/80 px-4 py-2 text-sm shadow-sm transition placeholder:text-mauve-light hover:border-line-strong focus:border-bill focus:outline-none"
               />
             </form>
             <nav className="flex items-center gap-3 text-sm">
@@ -68,7 +68,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               </Link>
               <Link
                 href="/sell"
-                className="rounded-full bg-duck px-4 py-1.5 font-semibold text-ink hover:bg-duck-deep"
+                className="rounded-full bg-ink px-4 py-2 font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-bill"
               >
                 판매하기
               </Link>
@@ -100,9 +100,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             </nav>
           </div>
         </header>
-        <main className="mx-auto max-w-5xl px-4 py-6">{children}</main>
-        <footer className="mt-16 border-t border-line">
-          <div className="mx-auto max-w-5xl space-y-2 px-4 py-10">
+        <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-8">{children}</main>
+        <footer className="mt-20 border-t border-line bg-blush/55">
+          <div className="mx-auto max-w-6xl space-y-3 px-4 py-12 sm:px-6">
             <p className="text-sm font-bold text-ink">
               덕션{" "}
               <span className="text-xs font-normal text-mauve">

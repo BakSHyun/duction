@@ -30,7 +30,7 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
   return (
     <Link
       href={`/auctions/${auction.id}`}
-      className="group overflow-hidden rounded-md border border-line bg-card transition hover:border-bill/30 hover:shadow-[0_2px_16px_rgba(43,33,38,0.08)]"
+      className="group overflow-hidden rounded-2xl border border-line bg-card shadow-[0_1px_0_rgba(38,35,28,0.03)] transition duration-300 hover:-translate-y-1 hover:border-bill/25 hover:shadow-[0_18px_40px_rgba(43,33,38,0.10)]"
     >
       <div className="relative aspect-square overflow-hidden bg-blush">
         {img ? (
@@ -38,7 +38,7 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
           <img
             src={img}
             alt={auction.item.title}
-            className={`h-full w-full object-cover transition group-hover:scale-105 ${ended ? "opacity-50" : ""}`}
+            className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.04] ${ended ? "opacity-50" : ""}`}
           />
         ) : (
           <div className="flex h-full items-center justify-center text-mauve-light">no image</div>
@@ -54,7 +54,7 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
           </span>
         )}
       </div>
-      <div className="space-y-1.5 p-3">
+      <div className="space-y-2 p-3.5 sm:p-4">
         <div className="flex flex-wrap gap-1">
           {auction.item.customLevel === "FULL" && auction.item.customArtist && (
             <span className="rounded bg-wisteria-soft px-1.5 py-0.5 text-[11px] font-semibold text-wisteria">
@@ -64,8 +64,8 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
           <AuthenticityBadge value={auction.item.authenticity} />
           <GradeBadge value={auction.item.conditionGrade} />
         </div>
-        <p className="line-clamp-2 text-sm font-medium leading-snug">{auction.item.title}</p>
-        <p className="num font-display text-lg font-semibold text-bill">{krw(auction.currentPrice)}</p>
+        <p className="line-clamp-2 min-h-10 text-sm font-semibold leading-snug tracking-[-0.01em]">{auction.item.title}</p>
+        <p className="num font-display text-lg font-extrabold tracking-[-0.03em] text-ink">{krw(auction.currentPrice)}</p>
         <div className="flex items-center justify-between text-xs text-mauve">
           <span>입찰 {auction.bidCount}건</span>
           {ended ? (

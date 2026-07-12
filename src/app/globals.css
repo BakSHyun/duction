@@ -43,10 +43,29 @@
 }
 
 body {
-  background: var(--color-porcelain);
+  background:
+    radial-gradient(circle at 8% 4%, rgb(255 212 0 / 0.11), transparent 24rem),
+    linear-gradient(180deg, #fffef9 0, var(--color-porcelain) 32rem);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+}
+
+@keyframes soft-rise {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.soft-rise {
+  animation: soft-rise 560ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.section-kicker {
+  color: var(--color-bill);
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
 }
 
 /* 하이브리드 앱·PWA — 노치/홈 인디케이터 세이프 에어리어 (M18) */

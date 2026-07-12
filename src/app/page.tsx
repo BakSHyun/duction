@@ -98,7 +98,7 @@ export default async function HomePage() {
   });
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-16 sm:space-y-20">
       {pinnedNotice && (
         <Link href="/notices" className="block rounded-xl border border-duck-deep/40 bg-cream px-4 py-3 text-sm hover:border-duck-deep">
           <span className="mr-2 rounded bg-duck px-1.5 py-0.5 text-[11px] font-bold text-ink">공지</span>
@@ -108,54 +108,54 @@ export default async function HomePage() {
       )}
 
       {/* 히어로 */}
-      <section className="relative overflow-hidden border-b border-line pb-10 pt-4 sm:pb-14 sm:pt-8">
-        <DuckMark className="pointer-events-none absolute -right-8 top-2 h-44 w-44 opacity-[0.12] sm:right-4 sm:h-56 sm:w-56 sm:opacity-100" />
-        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-bill">
-          Blythe Auction House
-        </p>
-        <h1 className="mt-4 max-w-2xl font-display text-3xl font-semibold leading-[1.35] text-balance sm:text-4xl">
-          아끼던 아이에게,
-          <br />
-          제값을 아는 새 집사를.
+      <section className="soft-rise relative overflow-hidden rounded-[2rem] border border-line bg-card px-6 py-10 shadow-[0_24px_80px_rgba(74,57,22,0.08)] sm:px-12 sm:py-14 lg:px-16 lg:py-16">
+        <div className="pointer-events-none absolute -right-16 -top-16 h-72 w-72 rounded-full bg-duck/25 blur-3xl" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-72 rounded-tl-full bg-cream" />
+        <DuckMark className="pointer-events-none absolute bottom-4 right-4 h-32 w-32 rotate-[-5deg] drop-shadow-[0_18px_20px_rgba(201,106,14,0.18)] sm:bottom-8 sm:right-10 sm:h-52 sm:w-52" />
+        <div className="relative z-10 max-w-2xl">
+        <p className="section-kicker">Blythe Auction House · Since 2026</p>
+        <h1 className="mt-5 font-display text-[2.4rem] font-black leading-[1.16] tracking-[-0.055em] text-balance sm:text-5xl lg:text-[3.65rem]">
+          좋아했던 마음까지,<br />제값에 이어지도록.
         </h1>
-        <p className="mt-5 max-w-xl text-sm leading-relaxed text-mauve sm:text-[15px]">
+        <p className="mt-6 max-w-xl text-sm leading-7 text-mauve sm:text-base">
           모든 입찰 기록이 공개되고, 대금은 수령 확인까지 덕션이 보관합니다. 정품과 팩토리는 반드시
           구분 표기 — 선입금 없는 브라이스 거래를 시작하세요.
         </p>
-        <div className="mt-6 flex flex-wrap items-center gap-3">
-          <Link href="/search" className="rounded-full bg-duck px-6 py-2.5 text-sm font-bold text-ink hover:bg-duck-deep">
-            경매 둘러보기
+        <div className="mt-7 flex flex-wrap items-center gap-3">
+          <Link href="/search" className="rounded-full bg-ink px-6 py-3 text-sm font-bold text-white shadow-lg shadow-ink/10 transition hover:-translate-y-0.5 hover:bg-bill">
+            지금 경매 보기 <span aria-hidden="true">→</span>
           </Link>
-          <Link href="/guide/first-bid" className="rounded-full border border-line-strong bg-card px-6 py-2.5 text-sm font-semibold text-ink/80 hover:border-bill/40">
-            처음이신가요? 첫 입찰 가이드
+          <Link href="/guide/first-bid" className="rounded-full border border-line-strong bg-white/70 px-6 py-3 text-sm font-semibold text-ink/80 transition hover:border-bill/40 hover:bg-white">
+            첫 입찰 가이드
           </Link>
         </div>
         {/* 스탯 스트립 — 돌아가는 시장의 증거 */}
-        <div className="mt-8 flex flex-wrap gap-x-8 gap-y-2 text-sm text-mauve">
+        <div className="mt-9 flex flex-wrap gap-3 text-sm text-mauve">
           <span>
-            진행 중 경매 <strong className="num font-bold text-ink">{liveCount}</strong>
+            진행 중 <strong className="num ml-1 rounded-full bg-duck/60 px-2 py-0.5 font-extrabold text-ink">{liveCount}</strong>
           </span>
           <span>
-            누적 낙찰 <strong className="num font-bold text-ink">{soldCount}</strong>건
+            누적 낙찰 <strong className="num font-extrabold text-ink">{soldCount}</strong>건
           </span>
           <span>
-            활동 작가 <strong className="num font-bold text-ink">{artistCount}</strong>명
+            활동 작가 <strong className="num font-extrabold text-ink">{artistCount}</strong>명
           </span>
+        </div>
         </div>
       </section>
 
       {/* 카테고리 숏컷 */}
-      <nav className="flex flex-wrap gap-2">
+      <nav className="-mt-9 flex flex-wrap gap-2 border-b border-line pb-7 sm:-mt-12">
         {parentCategories.map((c) => (
           <a
             key={c.id}
             href={`/search?cat=${c.slug}`}
-            className="rounded-full border border-line-strong bg-card px-4 py-1.5 text-sm font-medium hover:border-bill hover:text-bill"
+            className="rounded-full border border-line bg-card px-4 py-2 text-sm font-semibold shadow-sm transition hover:-translate-y-0.5 hover:border-bill hover:text-bill"
           >
             {c.name}
           </a>
         ))}
-        <Link href="/models" className="rounded-full border border-line-strong bg-card px-4 py-1.5 text-sm font-medium hover:border-bill hover:text-bill">
+        <Link href="/models" className="rounded-full border border-ink bg-ink px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-bill">
           모델 도감·시세
         </Link>
       </nav>
@@ -167,7 +167,7 @@ export default async function HomePage() {
             <h2 className="font-display text-lg font-semibold">분양 예고 · 곧 시작</h2>
             <Link href="/artists" className="text-sm text-mauve hover:text-bill">작가 보기 →</Link>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
             {scheduled.map((a) => (
               <AuctionCard key={a.id} auction={a} />
             ))}
