@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/auth";
 import DuckBadge from "@/components/DuckBadge";
 import PostForm from "@/components/PostForm";
+import Img from "@/components/Img";
 import { togglePostLikeAction, deleteMyPostAction } from "@/app/actions";
 
 export const metadata = { title: "컬렉션 피드" };
@@ -99,8 +100,7 @@ export default async function FeedPage() {
                 {post.images.length > 0 && (
                   <div className={`grid gap-0.5 ${post.images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
                     {post.images.map((img) => (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img key={img.id} src={img.url} alt="" className="aspect-square w-full object-cover" />
+                      <Img key={img.id} src={img.url} alt="" className="aspect-square w-full object-cover" />
                     ))}
                   </div>
                 )}

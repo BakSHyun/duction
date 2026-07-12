@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 
 /** 이미지 라이트박스 갤러리 (M22) — 하자 부위 확대 확인용 */
+const FALLBACK = "/placeholder.svg";
+const onErr = (e: React.SyntheticEvent<HTMLImageElement>) => {
+  if (e.currentTarget.src.endsWith(FALLBACK)) return;
+  e.currentTarget.src = FALLBACK;
+};
+
 export default function Gallery({ images, alt }: { images: string[]; alt: string }) {
   const [open, setOpen] = useState<number | null>(null);
 
@@ -35,14 +41,14 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
       <div className="space-y-2">
         <button onClick={() => setOpen(0)} className="block w-full overflow-hidden rounded-2xl bg-blush">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={images[0]} alt={alt} className="aspect-square w-full cursor-zoom-in object-cover" />
+          <img src={images[0]} alt={alt} onError={onErr} className="aspect-square w-full cursor-zoom-in object-cover" />
         </button>
         {images.length > 1 && (
           <div className="grid grid-cols-5 gap-2">
             {images.slice(1).map((url, i) => (
               <button key={url + i} onClick={() => setOpen(i + 1)}>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={url} alt="" className="aspect-square cursor-zoom-in rounded-lg object-cover" />
+                <img src={url} alt="" onError={onErr} className="aspect-square cursor-zoom-in rounded-lg object-cover" />
               </button>
             ))}
           </div>
@@ -60,6 +66,7 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
           <img
             src={images[open]}
             alt={alt}
+            onError={onErr}
             className="max-h-full max-w-full object-contain"
             onClick={(e) => e.stopPropagation()}
           />

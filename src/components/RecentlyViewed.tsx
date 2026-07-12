@@ -53,10 +53,8 @@ export default function RecentlyViewed() {
             className="w-36 shrink-0 overflow-hidden rounded-md border border-line bg-card transition hover:border-bill/30"
           >
             <div className="aspect-square bg-blush">
-              {e.img && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={e.img} alt={e.title} className="h-full w-full object-cover" />
-              )}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={e.img || "/placeholder.svg"} alt={e.title} onError={(ev) => { ev.currentTarget.src = "/placeholder.svg"; }} className="h-full w-full object-cover" />
             </div>
             <div className="p-2">
               <p className="line-clamp-1 text-xs font-medium">{e.title}</p>

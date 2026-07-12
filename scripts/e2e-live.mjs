@@ -54,6 +54,12 @@ const run = async () => {
   await bidder.waitForSelector('text=현재 최고 입찰자입니다', { timeout: 30000 });
   console.log("4. 입찰 OK — 현재 최고 입찰자 확인");
 
+  // 이미지 실제 로드 확인 (Supabase Storage)
+  const imgSrc = await bidder.locator("main img").first().getAttribute("src");
+  const imgRes = await bidder.request.get(imgSrc.startsWith("http") ? imgSrc : BASE + imgSrc);
+  console.log("4.5 이미지 로드:", imgRes.status(), imgSrc.includes("supabase") ? "(Supabase Storage)" : imgSrc.slice(0, 40));
+  if (imgRes.status() !== 200) throw new Error("image not served: " + imgSrc);
+
   // 현재가 반영 확인
   await bidder.reload({ waitUntil: "networkidle" });
   const price = await bidder.locator("text=5,000원").first().count();

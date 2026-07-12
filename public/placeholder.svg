@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+  <rect width="400" height="400" fill="#F6F4EE"/>
+  <g transform="translate(136,120) scale(4)" opacity="0.45">
+    <ellipse cx="16.5" cy="21.5" rx="11.5" ry="8" fill="#FFD400"/>
+    <circle cx="12" cy="10.5" r="7" fill="#FFD400"/>
+    <ellipse cx="21.5" cy="11.5" rx="4.8" ry="2.6" fill="#C96A0E"/>
+    <ellipse cx="17" cy="22" rx="4.5" ry="3" fill="#EFC000"/>
+    <circle cx="14.2" cy="8.6" r="1.5" fill="#26231C"/>
+  </g>
+  <text x="200" y="316" text-anchor="middle" font-family="sans-serif" font-size="17" fill="#B5B0A3">이미지가 잠시 쉬는 중이에요</text>
+</svg>

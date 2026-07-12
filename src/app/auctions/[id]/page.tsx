@@ -142,6 +142,12 @@ export default async function AuctionDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-line bg-card p-4 text-sm">
+          {!item.blytheModel && item.modelNameFree && (
+            <div>
+              <dt className="text-xs text-mauve-light">모델 (직접 기입)</dt>
+              <dd className="font-medium">{item.modelNameFree}</dd>
+            </div>
+          )}
           {item.blytheModel && (
             <>
               <div>

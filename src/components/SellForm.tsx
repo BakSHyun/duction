@@ -81,7 +81,7 @@ export default function SellForm({
               </select>
             </div>
             <div>
-              <label className={labelCls}>모델명</label>
+              <label className={labelCls}>모델명 (도감)</label>
               <select name="blytheModelId" className={inputCls}>
                 <option value="">목록에 없음 / 모름</option>
                 {lineModels.map((m) => (
@@ -91,6 +91,15 @@ export default function SellForm({
                 ))}
               </select>
             </div>
+          </div>
+          <div>
+            <label className={labelCls}>도감에 없나요? 모델명 직접 입력</label>
+            <input
+              name="modelNameFree"
+              maxLength={60}
+              placeholder="예) Lumi Demetria (도감 선택 시 이 칸은 무시돼요)"
+              className={inputCls}
+            />
           </div>
           <div>
             <label className={labelCls}>풀셋 구성 (있는 것만 체크)</label>

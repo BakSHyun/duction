@@ -2,6 +2,7 @@ import Link from "next/link";
 import { krw } from "@/lib/format";
 import { AuthenticityBadge, GradeBadge } from "./Badges";
 import Countdown from "./Countdown";
+import Img from "./Img";
 
 type AuctionCardProps = {
   auction: {
@@ -33,16 +34,7 @@ export default function AuctionCard({ auction }: AuctionCardProps) {
       className="group overflow-hidden rounded-2xl border border-line bg-card shadow-[0_1px_0_rgba(38,35,28,0.03)] transition duration-300 hover:-translate-y-1 hover:border-bill/25 hover:shadow-[0_18px_40px_rgba(43,33,38,0.10)]"
     >
       <div className="relative aspect-square overflow-hidden bg-blush">
-        {img ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={img}
-            alt={auction.item.title}
-            className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.04] ${ended ? "opacity-50" : ""}`}
-          />
-        ) : (
-          <div className="flex h-full items-center justify-center text-mauve-light">no image</div>
-        )}
+        <Img src={img} alt={auction.item.title} className={`h-full w-full object-cover transition duration-500 group-hover:scale-[1.04] ${ended ? "opacity-50" : ""}`} />
         {ended && (
           <span className="absolute left-2 top-2 rounded bg-ink/80 px-2 py-0.5 text-xs font-semibold text-white">
             {auction.status === "ENDED_SOLD" ? "낙찰" : "유찰"}

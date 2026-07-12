@@ -7,10 +7,14 @@ import { randomBytes } from "crypto";
  * 원본을 그대로 저장하지 않는다 — 최대 1600px 리사이징 + WebP 변환으로
  * 용량을 1/5~1/10로 줄인다.
  *
- * 저장소 (env로 자동 전환):
- * - R2_* env 설정 시 → Cloudflare R2 (운영 — Cloud Run은 파일시스템이 휘발성)
- * - 미설정 시 → 로컬 public/uploads (개발)
+ * 저장소 (env로 자동 전환, 우선순위):
+ * 1. R2_* env → Cloudflare R2
+ * 2. SUPABASE_URL + SUPABASE_SERVICE_KEY → Supabase Storage (현 운영 — M25)
+ * 3. 로컬 public/uploads (개발 전용 — Cloud Run에서는 서빙 불가)
  */
+
+const supabaseConfigured =
+  !!process.env.SUPABASE_URL && !!process.env.SUPABASE_SERVICE_KEY;
 
 const r2Configured =
   !!process.env.R2_ACCOUNT_ID &&
@@ -56,6 +60,22 @@ export async function processAndSaveImage(file: File): Promise<string> {
       }),
     );
     return `${process.env.R2_PUBLIC_URL!.replace(/\/$/, "")}/uploads/${name}`;
+  }
+
+  if (supabaseConfigured) {
+    const base = process.env.SUPABASE_URL!.replace(/\/$/, "");
+    const key = `uploads/${name}`;
+    const res = await fetch(`${base}/storage/v1/object/media/${key}`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.SUPABASE_SERVICE_KEY}`,
+        "Content-Type": "image/webp",
+        "Cache-Control": "public, max-age=31536000, immutable",
+      },
+      body: new Uint8Array(processed),
+    });
+    if (!res.ok) throw new Error(`storage upload failed: ${res.status} ${await res.text()}`);
+    return `${base}/storage/v1/object/public/media/${key}`;
   }
 
   const uploadDir = path.join(process.cwd(), "public", "uploads");

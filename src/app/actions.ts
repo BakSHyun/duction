@@ -166,6 +166,7 @@ export async function createListingAction(_: ActionResult | null, formData: Form
   }
 
   const blytheModelId = String(formData.get("blytheModelId") ?? "") || null;
+  const modelNameFree = String(formData.get("modelNameFree") ?? "").trim().slice(0, 60) || null;
   const customLevel = String(formData.get("customLevel") ?? "NONE");
   const customArtist = String(formData.get("customArtist") ?? "").trim() || null;
   const customDetails = String(formData.get("customDetails") ?? "").trim() || null;
@@ -179,6 +180,7 @@ export async function createListingAction(_: ActionResult | null, formData: Form
       conditionGrade,
       authenticity,
       blytheModelId,
+      modelNameFree: blytheModelId ? null : modelNameFree,
       fullSetBox: formData.get("fullSetBox") === "on",
       fullSetCert: formData.get("fullSetCert") === "on",
       fullSetStand: formData.get("fullSetStand") === "on",
@@ -537,6 +539,7 @@ export async function relistAuctionAction(formData: FormData) {
       conditionGrade: old.item.conditionGrade,
       authenticity: old.item.authenticity,
       blytheModelId: old.item.blytheModelId,
+      modelNameFree: old.item.modelNameFree,
       fullSetBox: old.item.fullSetBox,
       fullSetCert: old.item.fullSetCert,
       fullSetStand: old.item.fullSetStand,

@@ -156,6 +156,8 @@ model Item {
   // 브라이스 본체 전용 필드
   blytheModelId String?
   blytheModel   BlytheModel? @relation(fields: [blytheModelId], references: [id])
+  // 도감에 없는 모델 직접 기입 (M26) — 운영자가 검수 후 도감에 편입
+  modelNameFree String?
   fullSetBox    Boolean @default(false)
   fullSetCert   Boolean @default(false) // 증지
   fullSetStand  Boolean @default(false)
